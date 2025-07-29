@@ -37,37 +37,38 @@ pub mod request {
         pub fn parse_from_tcp_stream(stream: &TcpStream) -> Self {
             let mut buf_reader = BufReader::new(stream);
             let request_vec: Vec<String> = buf_reader
+                .by_ref()
                 .lines()
                 .map(|result| result.unwrap())
                 .take_while(|line| !line.is_empty())
                 .collect();
 
             dbg!(&request_vec);
-
-            let request_line = &request_vec[0];
-
+            
             let mut headers: HashMap<String, String> = HashMap::new();
             for line in &request_vec[1..] {
                 if let Some((key, value)) = line.split_once(": ") {
                     headers.insert(key.into(), value.into());
                 }
             }
-
+            
             dbg!(&headers);
-
+            
             let content_length = headers
                 .get("Content-Length")
                 .and_then(|v| v.parse::<usize>().ok())
                 .unwrap_or(0);
-
+            
             let mut body = vec![0; content_length];
             buf_reader.read_exact(&mut body).unwrap();
-
+            let body = String::from_utf8_lossy(&body);
+            
             dbg!(body);
-
+            
+            let request_line = &request_vec[0];
             Request {
-                method: Self::parse_method(&request_line),
-                endpoint: Self::parse_endpoint(&request_line),
+                method: Self::parse_method(request_line),
+                endpoint: Self::parse_endpoint(request_line),
             }
         }
 
