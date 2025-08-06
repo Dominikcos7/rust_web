@@ -3,10 +3,13 @@ pub mod request {
     use std::io::{BufReader, prelude::*};
     use std::net::TcpStream;
 
+    const CONTENT_TYPE_TEXT_PLAIN: &str = "text/plain";
+
     #[derive(Debug)]
     pub struct Request {
         method: Option<RequestMethod>,
         endpoint: Option<String>,
+        body: Option<String>,
     }
 
     impl Request {
@@ -14,6 +17,7 @@ pub mod request {
             Request {
                 method: self.method,
                 endpoint: self.endpoint,
+                body: self.body,
             }
         }
 
@@ -21,7 +25,13 @@ pub mod request {
             Request {
                 method: None,
                 endpoint: None,
+                body: None,
             }
+        }
+
+        pub fn body(mut self: Self, body: String) -> Self {
+            self.body = Some(body);
+            self
         }
 
         pub fn endpoint(mut self: Self, endpoint: String) -> Self {
@@ -42,8 +52,6 @@ pub mod request {
                 .map(|result| result.unwrap())
                 .take_while(|line| !line.is_empty())
                 .collect();
-
-            dbg!(&request_vec);
             
             let mut headers: HashMap<String, String> = HashMap::new();
             for line in &request_vec[1..] {
@@ -51,24 +59,26 @@ pub mod request {
                     headers.insert(key.into(), value.into());
                 }
             }
-            
-            dbg!(&headers);
+
+            let content_type = headers
+                .get("Content-Type")
+                .and_then(|v| v.parse::<String>().ok())
+                .unwrap_or(String::from(""));
             
             let content_length = headers
                 .get("Content-Length")
                 .and_then(|v| v.parse::<usize>().ok())
                 .unwrap_or(0);
-            
+
             let mut body = vec![0; content_length];
             buf_reader.read_exact(&mut body).unwrap();
-            let body = String::from_utf8_lossy(&body);
-            
-            dbg!(body);
+            let body: String = String::from_utf8_lossy(&body).into();
             
             let request_line = &request_vec[0];
             Request {
                 method: Self::parse_method(request_line),
                 endpoint: Self::parse_endpoint(request_line),
+                body: Some(body),
             }
         }
 
