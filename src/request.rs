@@ -73,12 +73,13 @@ pub mod request {
             let mut body = vec![0; content_length];
             buf_reader.read_exact(&mut body).unwrap();
             let body: String = String::from_utf8_lossy(&body).into();
+            let body = if body.is_empty() {None} else {Some(body)};
             
             let request_line = &request_vec[0];
             Request {
                 method: Self::parse_method(request_line),
                 endpoint: Self::parse_endpoint(request_line),
-                body: Some(body),
+                body: body,
             }
         }
 
