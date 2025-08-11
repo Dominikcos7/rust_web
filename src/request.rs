@@ -9,35 +9,11 @@ use crate::request::request_line::RequestLine;
 
 #[derive(Debug)]
 pub struct Request {
-    request_line: Option<RequestLine>,
+    request_line: RequestLine,
     body: Option<String>,
 }
 
 impl Request {
-    pub fn build(self: Self) -> Self {
-        Request {
-            request_line: self.request_line,
-            body: self.body,
-        }
-    }
-
-    pub fn builder() -> Self {
-        Request {
-            request_line: None,
-            body: None,
-        }
-    }
-
-    pub fn body(mut self: Self, body: String) -> Self {
-        self.body = Some(body);
-        self
-    }
-
-    pub fn request_line(mut self: Self, request_line: RequestLine) -> Self {
-        self.request_line = Some(request_line);
-        self
-    }
-
     pub fn parse_from_tcp_stream(stream: &TcpStream) -> Self {
         let mut buf_reader = BufReader::new(stream);
         let request_vec: Vec<String> = buf_reader
@@ -62,7 +38,7 @@ impl Request {
             .unwrap_or(0);
         
         Request {
-            request_line: Some(request_line),
+            request_line: request_line,
             body: Self::parse_body(content_type, content_length, &mut buf_reader),
         }
     }
@@ -76,10 +52,9 @@ impl Request {
         body
     }
 
-    fn parse_endpoint(request_line: &String) -> Option<String> {
+    fn parse_endpoint(request_line: &String) -> String {
         let endpoint: String = request_line.split(" ").collect::<Vec<_>>()[1].into();
-
-        Some(endpoint)
+        endpoint
     }
 
     fn parse_headers(request_vec: &[String]) -> HashMap<String, String> {
