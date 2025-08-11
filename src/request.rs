@@ -26,11 +26,6 @@ impl Request {
         let request_line = RequestLine::from_string(&request_vec[0]);
 
         let headers = Self::parse_headers(&request_vec[1..]);
-
-        let content_type = headers
-            .get("Content-Type")
-            .and_then(|v| v.parse::<String>().ok())
-            .unwrap_or(String::from(""));
         
         let content_length = headers
             .get("Content-Length")
@@ -39,11 +34,11 @@ impl Request {
         
         Request {
             request_line: request_line,
-            body: Self::parse_body(content_type, content_length, &mut buf_reader),
+            body: Self::read_body(content_length, &mut buf_reader),
         }
     }
 
-    fn parse_body(content_type: String, content_length: usize, reader: &mut BufReader<&TcpStream>) -> Option<String> {
+    fn read_body(content_length: usize, reader: &mut BufReader<&TcpStream>) -> Option<String> {
         let mut body = vec![0; content_length];
         reader.read_exact(&mut body).unwrap();
         let body: String = String::from_utf8_lossy(&body).into();
