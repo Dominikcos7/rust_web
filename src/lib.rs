@@ -1,9 +1,10 @@
+mod response;
 mod request;
 
 use std::io::prelude::*;
 use std::net::{TcpStream};
 
-use crate::request::request::*;
+use crate::request::*;
 
 pub fn handle_client(stream: TcpStream) {
     let request = Request::parse_from_tcp_stream(&stream);
