@@ -10,6 +10,7 @@ use crate::request::request_line::RequestLine;
 #[derive(Debug)]
 pub struct Request {
     request_line: RequestLine,
+    headers: Option<HashMap<String, String>>,
     body: Option<String>,
 }
 
@@ -26,14 +27,22 @@ impl Request {
         let request_line = RequestLine::from_string(&request_vec[0]);
 
         let headers = Self::parse_headers(&request_vec[1..]);
-        
-        let content_length = headers
-            .get("Content-Length")
-            .and_then(|v| v.parse::<usize>().ok())
-            .unwrap_or(0);
+
+        let content_length: usize = match headers.is_some() {
+            true => {
+                headers
+                .as_ref()
+                .unwrap()
+                .get("Content-Length")
+                .and_then(|v| v.parse::<usize>().ok())
+                .unwrap_or(0)
+            },
+            false => 0
+        };
         
         Request {
             request_line: request_line,
+            headers: headers,
             body: Self::read_body(content_length, &mut buf_reader),
         }
     }
@@ -52,7 +61,7 @@ impl Request {
         endpoint
     }
 
-    fn parse_headers(request_vec: &[String]) -> HashMap<String, String> {
+    fn parse_headers(request_vec: &[String]) -> Option<HashMap<String, String>> {
         let mut headers: HashMap<String, String> = HashMap::new();
         for line in request_vec {
             if let Some((key, value)) = line.split_once(": ") {
@@ -60,6 +69,6 @@ impl Request {
             }
         }
 
-        headers
+        if headers.is_empty() {None} else {Some(headers)}
     }
 }
