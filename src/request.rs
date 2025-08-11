@@ -31,12 +31,12 @@ impl Request {
         let content_length: usize = match headers.is_some() {
             true => {
                 headers
-                .as_ref()
-                .unwrap()
-                .get("Content-Length")
-                .and_then(|v| v.parse::<usize>().ok())
-                .unwrap_or(0)
-            },
+                    .as_ref()
+                    .unwrap()
+                    .get("Content-Length")
+                    .and_then(|v| v.parse::<usize>().ok())
+                    .unwrap_or(0)
+                },
             false => 0
         };
         
