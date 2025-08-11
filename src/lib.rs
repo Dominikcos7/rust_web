@@ -1,21 +1,24 @@
 mod response;
 mod request;
 
+use std::collections::HashMap;
 use std::io::prelude::*;
 use std::net::{TcpStream};
 
 use crate::request::*;
+use crate::response::*;
 
-pub fn handle_client(stream: TcpStream) {
+pub fn handle_client(mut stream: TcpStream) {
     let request = Request::parse_from_tcp_stream(&stream);
     dbg!(request);
 
-    resp_200(stream)
-}
+    let response = Response {
+        status_line: StatusLine::from_string("HTTP/1.1 200 OK".to_string()),
+        headers: None,
+        body: None,
+    };
 
-fn resp_200(mut stream: TcpStream) {
-    let response = format!("HTTP/1.1 200 OK\r\n\r\n");
-    stream.write_all(response.as_bytes()).unwrap();
+    stream.write_all(response.as_bytes().as_slice()).unwrap();
 }
 
 #[cfg(test)]
