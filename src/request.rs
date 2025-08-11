@@ -53,12 +53,7 @@ pub mod request {
                 .take_while(|line| !line.is_empty())
                 .collect();
             
-            let mut headers: HashMap<String, String> = HashMap::new();
-            for line in &request_vec[1..] {
-                if let Some((key, value)) = line.split_once(": ") {
-                    headers.insert(key.into(), value.into());
-                }
-            }
+            let headers = Self::parse_headers(&request_vec[1..]);
 
             let content_type = headers
                 .get("Content-Type")
@@ -69,24 +64,39 @@ pub mod request {
                 .get("Content-Length")
                 .and_then(|v| v.parse::<usize>().ok())
                 .unwrap_or(0);
-
-            let mut body = vec![0; content_length];
-            buf_reader.read_exact(&mut body).unwrap();
-            let body: String = String::from_utf8_lossy(&body).into();
-            let body = if body.is_empty() {None} else {Some(body)};
             
             let request_line = &request_vec[0];
             Request {
                 method: Self::parse_method(request_line),
                 endpoint: Self::parse_endpoint(request_line),
-                body: body,
+                body: Self::parse_body(content_type, content_length, &mut buf_reader),
             }
+        }
+
+        fn parse_body(content_type: String, content_length: usize, reader: &mut BufReader<&TcpStream>) -> Option<String> {
+            let mut body = vec![0; content_length];
+            reader.read_exact(&mut body).unwrap();
+            let body: String = String::from_utf8_lossy(&body).into();
+
+            let body = if body.is_empty() {None} else {Some(body)};
+            body
         }
 
         fn parse_endpoint(request_line: &String) -> Option<String> {
             let endpoint: String = request_line.split(" ").collect::<Vec<_>>()[1].into();
 
             Some(endpoint)
+        }
+
+        fn parse_headers(request_vec: &[String]) -> HashMap<String, String> {
+            let mut headers: HashMap<String, String> = HashMap::new();
+            for line in request_vec {
+                if let Some((key, value)) = line.split_once(": ") {
+                    headers.insert(key.into(), value.into());
+                }
+            }
+
+            headers
         }
 
         fn parse_method(request_line: &String) -> Option<RequestMethod> {
