@@ -15,7 +15,7 @@ pub fn handle_client(mut stream: TcpStream) {
     let response = Response {
         status_line: StatusLine::from_string("HTTP/1.1 200 OK".to_string()),
         headers: None,
-        body: None,
+        body: Some(String::from("some body")),
     };
 
     stream.write_all(response.as_bytes().as_slice()).unwrap();
