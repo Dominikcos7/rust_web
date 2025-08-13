@@ -56,11 +56,6 @@ impl Request {
         body
     }
 
-    fn parse_endpoint(request_line: &String) -> String {
-        let endpoint: String = request_line.split(" ").collect::<Vec<_>>()[1].into();
-        endpoint
-    }
-
     fn parse_headers(request_vec: &[String]) -> Option<HashMap<String, String>> {
         let mut headers: HashMap<String, String> = HashMap::new();
         for line in request_vec {
