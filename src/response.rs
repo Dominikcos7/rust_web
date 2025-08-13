@@ -74,3 +74,30 @@ impl ResponseBuilder {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn get_default_response_builder() {
+        let builder = Response::builder()
+            .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()))
+            .header("Date", "2025")
+            //continue: use httptdate and chrono or time crate to handle dates
+    }
+
+    #[test]
+    #[should_panic]
+    fn builder_should_not_build_if_status_line_is_none() {
+        let builder = get_default_response_builder();
+        builder.build();
+    }
+
+    #[test]
+    #[should_panic]
+    fn builder_should_not_build_if_headers_is_none() {
+        let builder = Response::builder()
+            .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()));
+        builder.build();
+    }
+}
