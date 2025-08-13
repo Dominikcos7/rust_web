@@ -21,11 +21,13 @@ impl Response {
             }
         }
 
+        s.push_str("\r\n\r\n");
+        
         if self.body.is_some() {
-            s.push_str("\r\n\r\n");
             s.push_str(self.body.as_ref().unwrap().as_str());
         }
 
+        dbg!(&s);
         s.into_bytes()
     }
 }
