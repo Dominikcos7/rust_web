@@ -17,7 +17,7 @@ pub fn handle_client(mut stream: TcpStream) {
 
     let body = String::from("some body");
     let response = Response::builder()
-        .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()))
+        .status_line(StatusLine::from_str("HTTP/1.1 200 OK"))
         .header("Date".to_string(), fmt_http_date(SystemTime::now()))
         .header(String::from("Content-Length"), body.len().to_string())
         .header(String::from("Content-Type"), String::from("text/html"))

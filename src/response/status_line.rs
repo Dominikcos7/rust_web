@@ -10,7 +10,7 @@ impl StatusLine {
         format!("{} {} {}", self.http_version, self.status_code, self.reason_phrase)
     }
 
-    pub fn from_string(s: String) -> Self {
+    pub fn from_str(s: &str) -> Self {
         let parts = s.split(" ").collect::<Vec<_>>();
 
         StatusLine { 

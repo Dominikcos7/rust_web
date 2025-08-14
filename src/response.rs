@@ -93,7 +93,7 @@ mod tests {
 
     fn get_default_response_builder() -> ResponseBuilder {
         let builder = Response::builder()
-            .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()))
+            .status_line(StatusLine::from_str("HTTP/1.1 200 OK"))
             .header("Date".to_string(), fmt_http_date(SystemTime::now()))
             .header("Content-Type".to_string(), "text/html".to_string());
 
@@ -113,7 +113,7 @@ mod tests {
     #[should_panic]
     fn builder_should_not_build_if_headers_is_none() {
         let builder = Response::builder()
-            .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()));
+            .status_line(StatusLine::from_str("HTTP/1.1 200 OK"));
         builder.build();
     }
 
@@ -121,7 +121,7 @@ mod tests {
     #[should_panic]
     fn builder_should_not_build_if_date_header_is_missing() {
         let builder = Response::builder()
-            .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()))
+            .status_line(StatusLine::from_str("HTTP/1.1 200 OK"))
             .header("Content-Type".to_string(), "text/html".to_string());
         builder.build();
     }
@@ -130,7 +130,7 @@ mod tests {
     #[should_panic]
     fn builder_should_not_build_if_content_type_header_is_missing() {
         let builder = Response::builder()
-            .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()))
+            .status_line(StatusLine::from_str("HTTP/1.1 200 OK"))
             .header("Date".to_string(), fmt_http_date(SystemTime::now()));
         builder.build();
     }
