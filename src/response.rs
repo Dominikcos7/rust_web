@@ -1,5 +1,6 @@
 pub use crate::response::status_line::StatusLine;
 
+use httpdate::fmt_http_date;
 use std::collections::HashMap;
 
 mod status_line;
@@ -51,6 +52,16 @@ impl ResponseBuilder {
     }
 
     pub fn build(self: Self) -> Response {
+        if let Some(h) = &self.headers {
+            if !h.contains_key(&"Date".to_string()) {
+                panic!("Response should contain Date header.");
+            }
+
+            if !h.contains_key(&"Content-Length".to_string()) {
+                panic!("Response should contain Content-Length header.");
+            }
+        }
+
         Response {
             status_line: self.status_line.expect("Setting a status line is required."),
             headers: self.headers.expect("Setting at least one header is required."),
@@ -77,19 +88,25 @@ impl ResponseBuilder {
 
 #[cfg(test)]
 mod tests {
+    use std::time::SystemTime;
+
     use super::*;
 
-    fn get_default_response_builder() {
+    fn get_default_response_builder() -> ResponseBuilder {
         let builder = Response::builder()
             .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()))
-            .header("Date", "2025")
-            //continue: use httptdate and chrono or time crate to handle dates
+            .header("Date".to_string(), fmt_http_date(SystemTime::now()))
+            .header("Content-Type".to_string(), "text/html".to_string());
+
+        builder
     }
 
     #[test]
     #[should_panic]
     fn builder_should_not_build_if_status_line_is_none() {
-        let builder = get_default_response_builder();
+        let builder = Response::builder()
+            .header("Date".to_string(), fmt_http_date(SystemTime::now()))
+            .header("Content-Type".to_string(), "text/html".to_string());
         builder.build();
     }
 
@@ -98,6 +115,24 @@ mod tests {
     fn builder_should_not_build_if_headers_is_none() {
         let builder = Response::builder()
             .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()));
+        builder.build();
+    }
+
+    #[test]
+    #[should_panic]
+    fn builder_should_not_build_if_date_header_is_missing() {
+        let builder = Response::builder()
+            .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()))
+            .header("Content-Type".to_string(), "text/html".to_string());
+        builder.build();
+    }
+
+    #[test]
+    #[should_panic]
+    fn builder_should_not_build_if_content_type_header_is_missing() {
+        let builder = Response::builder()
+            .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()))
+            .header("Date".to_string(), fmt_http_date(SystemTime::now()));
         builder.build();
     }
 }
