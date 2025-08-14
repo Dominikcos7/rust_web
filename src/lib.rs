@@ -1,8 +1,10 @@
 mod response;
 mod request;
 
+use httpdate::fmt_http_date;
 use std::io::prelude::*;
 use std::net::{TcpStream};
+use std::time::SystemTime;
 
 use crate::request::*;
 use crate::response::*;
@@ -16,10 +18,13 @@ pub fn handle_client(mut stream: TcpStream) {
     let body = String::from("some body");
     let response = Response::builder()
         .status_line(StatusLine::from_string("HTTP/1.1 200 OK".to_string()))
+        .header("Date".to_string(), fmt_http_date(SystemTime::now()))
         .header(String::from("Content-Length"), body.len().to_string())
         .header(String::from("Content-Type"), String::from("text/html"))
         .body(body)
         .build();
+
+    dbg!(&response);
 
     stream.write_all(response.as_bytes().as_slice()).unwrap();
 }

@@ -75,7 +75,6 @@ impl ResponseBuilder {
         }
 
         self.headers.as_mut().unwrap().insert(name, value);
-        dbg!(&self.headers);
 
         self
     }
