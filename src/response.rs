@@ -69,12 +69,12 @@ impl ResponseBuilder {
         }
     }
 
-    pub fn header(mut self: Self, name: String, value: String) -> Self {
+    pub fn header(mut self: Self, name: &str, value: &str) -> Self {
         if self.headers.is_none() {
             self.headers = Some(HashMap::new());
         }
 
-        self.headers.as_mut().unwrap().insert(name, value);
+        self.headers.as_mut().unwrap().insert(name.to_string(), value.to_string());
 
         self
     }
@@ -94,8 +94,8 @@ mod tests {
     fn get_default_response_builder() -> ResponseBuilder {
         let builder = Response::builder()
             .status_line(StatusLine::from_str("HTTP/1.1 200 OK"))
-            .header("Date".to_string(), fmt_http_date(SystemTime::now()))
-            .header("Content-Type".to_string(), "text/html".to_string());
+            .header("Date", &fmt_http_date(SystemTime::now()))
+            .header("Content-Type", "text/html");
 
         builder
     }
@@ -104,8 +104,8 @@ mod tests {
     #[should_panic]
     fn builder_should_not_build_if_status_line_is_none() {
         let builder = Response::builder()
-            .header("Date".to_string(), fmt_http_date(SystemTime::now()))
-            .header("Content-Type".to_string(), "text/html".to_string());
+            .header("Date", &fmt_http_date(SystemTime::now()))
+            .header("Content-Type", "text/html");
         builder.build();
     }
 
@@ -122,7 +122,7 @@ mod tests {
     fn builder_should_not_build_if_date_header_is_missing() {
         let builder = Response::builder()
             .status_line(StatusLine::from_str("HTTP/1.1 200 OK"))
-            .header("Content-Type".to_string(), "text/html".to_string());
+            .header("Content-Type", "text/html");
         builder.build();
     }
 
@@ -131,7 +131,7 @@ mod tests {
     fn builder_should_not_build_if_content_type_header_is_missing() {
         let builder = Response::builder()
             .status_line(StatusLine::from_str("HTTP/1.1 200 OK"))
-            .header("Date".to_string(), fmt_http_date(SystemTime::now()));
+            .header("Date", &fmt_http_date(SystemTime::now()));
         builder.build();
     }
 }
