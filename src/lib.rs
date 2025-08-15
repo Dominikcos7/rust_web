@@ -1,5 +1,7 @@
+mod controller;
 mod response;
 mod request;
+mod router;
 
 use httpdate::fmt_http_date;
 use std::io::prelude::*;
@@ -9,12 +11,14 @@ use std::time::SystemTime;
 
 use crate::request::*;
 use crate::response::*;
+use crate::router::Router;
 
 //todo: insert an url mapper into this function
 //      the mapper will find the controller which will send the response
 pub fn handle_client(mut stream: TcpStream) {
     let request = Request::parse_from_tcp_stream(&stream);
-    dbg!(request);
+    //dbg!(&request);
+    Router::handle_request(request);
 
     let body = fs::read_to_string("./src/views/index/index.html").expect("Should have found file.");
     let response = Response::builder()
@@ -25,7 +29,7 @@ pub fn handle_client(mut stream: TcpStream) {
         .body(body)
         .build();
 
-    dbg!(&response);
+    //dbg!(&response);
 
     stream.write_all(response.as_bytes().as_slice()).unwrap();
 }
