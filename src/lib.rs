@@ -3,6 +3,7 @@ mod request;
 
 use httpdate::fmt_http_date;
 use std::io::prelude::*;
+use std::fs;
 use std::net::{TcpStream};
 use std::time::SystemTime;
 
@@ -15,7 +16,7 @@ pub fn handle_client(mut stream: TcpStream) {
     let request = Request::parse_from_tcp_stream(&stream);
     dbg!(request);
 
-    let body = String::from("some body");
+    let body = fs::read_to_string("./src/views/index/index.html").expect("Should have found file.");
     let response = Response::builder()
         .status_line(StatusLine::from_str("HTTP/1.1 200 OK"))
         .header("Date", &fmt_http_date(SystemTime::now()))
