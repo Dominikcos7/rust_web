@@ -1,14 +1,20 @@
 use std::collections::HashMap;
 
-use crate::{controller::Controller, request::Request};
+use crate::{
+    controller:: {
+        Controller,
+        dummy_controller::DummyController,
+    }, request::Request, response::Response
+};
 
 pub struct Router<'a> {
-    map: HashMap<&'a str, Box<dyn Controller>>
+    controller_map: HashMap<&'a str, Box<dyn Controller>>
 }
 
 impl Router<'_> {
-    pub fn handle_request(request: Request) {
+    pub fn handle_request(request: Request) -> Response {
         let (controller, action) = Self::parse_path(request.get_path());
+        DummyController::respond_404_not_found()
     }
 
     fn parse_path(path: &String) -> (&str, &str) {

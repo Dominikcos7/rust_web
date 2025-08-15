@@ -18,16 +18,16 @@ use crate::router::Router;
 pub fn handle_client(mut stream: TcpStream) {
     let request = Request::parse_from_tcp_stream(&stream);
     //dbg!(&request);
-    Router::handle_request(request);
+    let response = Router::handle_request(request);
 
-    let body = fs::read_to_string("./src/views/index/index.html").expect("Should have found file.");
+    /*let body = fs::read_to_string("./src/views/index/index.html").expect("Should have found file.");
     let response = Response::builder()
         .status_line(StatusLine::from_str("HTTP/1.1 200 OK"))
         .header("Date", &fmt_http_date(SystemTime::now()))
         .header("Content-Length", &body.len().to_string())
         .header("Content-Type", "text/html")
         .body(body)
-        .build();
+        .build();*/
 
     //dbg!(&response);
 
