@@ -1,7 +1,9 @@
+pub mod controllers;
 mod response;
 mod request;
 
 use httpdate::fmt_http_date;
+use std::collections::HashMap;
 use std::io::prelude::*;
 use std::fs;
 use std::net::{TcpStream};
@@ -12,7 +14,9 @@ use crate::response::*;
 
 //todo: insert an url mapper into this function
 //      the mapper will find the controller which will send the response
-pub fn handle_client(mut stream: TcpStream) {
+pub fn handle_client(mut stream: TcpStream, registry: &HashMap<(&'static str, &'static str), fn()>) {
+    registry.get(&("index", "index")).expect("should have found index index")();
+
     let request = Request::parse_from_tcp_stream(&stream);
     dbg!(request);
 
