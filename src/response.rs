@@ -2,6 +2,7 @@ pub use crate::response::status_line::StatusLine;
 
 use httpdate::fmt_http_date;
 use std::collections::HashMap;
+use std::time::SystemTime;
 
 mod status_line;
 
@@ -46,6 +47,13 @@ pub struct ResponseBuilder {
 }
 
 impl ResponseBuilder {
+    pub fn _404(self: Self) -> Self {
+        self.status_line(StatusLine::from_str("HTTP/1.1 404 NOT FOUND"))
+            .header("Date", &fmt_http_date(SystemTime::now()))
+            .header("Content-Length", "0")
+            .header("Content-Type", "text/html")
+    }
+
     pub fn body(mut self: Self, body: String) -> Self {
         self.body = Some(body);
         self
