@@ -15,6 +15,10 @@ pub struct Request {
 }
 
 impl Request {
+    pub fn get_path(self: Self) -> String {
+        self.request_line.get_path()
+    }
+
     pub fn parse_from_tcp_stream(stream: &TcpStream) -> Self {
         let mut buf_reader = BufReader::new(stream);
         let request_vec: Vec<String> = buf_reader

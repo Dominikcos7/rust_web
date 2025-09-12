@@ -20,6 +20,10 @@ impl RequestLine {
         }
     }
 
+    pub fn get_path(self: Self) -> String {
+        self.path
+    }
+
     fn parse_method(request_line: &str) -> RequestMethod {
         let method = match request_line {
             x if x.to_lowercase().contains("delete") => RequestMethod::Delete,

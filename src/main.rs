@@ -1,5 +1,6 @@
 use std::{collections::HashMap, fs};
 
+use webserver::response::Response;
 use webserver::controllers::{
     index_controller::IndexController,
 };
@@ -17,7 +18,7 @@ fn main() -> std::io::Result<()> {
     let host = config.get("host").expect("Config should include host.");
     let listener = std::net::TcpListener::bind(host)?;
 
-    let mut registry: HashMap<&'static str, fn()> = HashMap::new();
+    let mut registry: HashMap<&'static str, fn() -> Response> = HashMap::new();
     registry.insert("/", IndexController::action_index);
 
     for stream in listener.incoming() {
