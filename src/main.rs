@@ -17,8 +17,8 @@ fn main() -> std::io::Result<()> {
     let host = config.get("host").expect("Config should include host.");
     let listener = std::net::TcpListener::bind(host)?;
 
-    let mut registry: HashMap<(&'static str, &'static str), fn()> = HashMap::new();
-    registry.insert(("index", "index"), IndexController::action_index);
+    let mut registry: HashMap<&'static str, fn()> = HashMap::new();
+    registry.insert("/", IndexController::action_index);
 
     for stream in listener.incoming() {
         webserver::handle_client(stream?, &registry);
