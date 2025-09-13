@@ -1,18 +1,16 @@
 pub mod controllers;
+pub mod registry;
 pub mod response;
 mod request;
 
-use httpdate::fmt_http_date;
-use std::collections::HashMap;
 use std::io::prelude::*;
-use std::fs;
 use std::net::{TcpStream};
-use std::time::SystemTime;
 
+use crate::registry::Registry;
 use crate::request::*;
 use crate::response::*;
 
-pub fn handle_client(mut stream: TcpStream, registry: &HashMap<&'static str, fn() -> Response>) {
+pub fn handle_client(mut stream: TcpStream, registry: &Registry) {
     let request = Request::parse_from_tcp_stream(&stream);
     dbg!(&request);
 
