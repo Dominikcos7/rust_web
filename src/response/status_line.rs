@@ -12,11 +12,14 @@ impl StatusLine {
 
     pub fn from_str(s: &str) -> Self {
         let parts = s.split(" ").collect::<Vec<_>>();
+        let http_version: String = parts[0].into();
+        let status_code: i32 = parts[1].parse::<i32>().unwrap();
+        let reason_phrase: String =  parts[2..].join(" ");
 
         StatusLine { 
-            http_version: parts[0].into(),
-            status_code: parts[1].parse::<i32>().unwrap(),
-            reason_phrase: parts[2].into(),
+            http_version: http_version,
+            status_code: status_code,
+            reason_phrase: reason_phrase,
         }
     }
 }
