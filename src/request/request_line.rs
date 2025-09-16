@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use super::request_method::RequestMethod;
 
 #[derive(Debug)]
@@ -22,6 +23,25 @@ impl RequestLine {
 
     pub fn get_path(self: Self) -> String {
         self.path
+    }
+
+    pub fn get_query_params(self: Self) -> HashMap<String, String> {
+        let mut params = HashMap::new();
+
+        if let Some(query) = self.query {
+            let parts = query.split("&").collect::<Vec<_>>();
+            for p in parts.into_iter() {
+                let kvargs = p.split("=").collect::<Vec<_>>();
+
+                if kvargs.len() != 2 {
+                    panic!("Query parameter should consist of a key and a value");
+                }
+
+                params.insert(kvargs[0].into(), kvargs[1].into());
+            }
+        }
+
+        params
     }
 
     fn parse_method(request_line: &str) -> RequestMethod {
@@ -53,6 +73,39 @@ impl RequestLine {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn get_one_query_param() {
+        let request_line = RequestLine::from_string(&"DELETE /?name=alice HTTP/1.1".to_string());
+        let expected = HashMap::from([
+            ("name".to_string(), "alice".to_string())
+        ]);
+        let actual = request_line.get_query_params();
+
+        assert_eq!(expected, actual);
+    }
+    
+    #[test]
+    fn get_multiple_query_params() {
+        let request_line = RequestLine::from_string(&"DELETE /?name=alice&password=1234&isHuman=true HTTP/1.1".to_string());
+        let expected = HashMap::from([
+            ("name".to_string(), "alice".to_string()),
+            ("password".to_string(), "1234".to_string()),
+            ("isHuman".to_string(), "true".to_string()),
+        ]);
+        let actual = request_line.get_query_params();
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn get_no_query_param() {
+        let request_line = RequestLine::from_string(&"DELETE / HTTP/1.1".to_string());
+        let expected = HashMap::new();
+        let actual = request_line.get_query_params();
+
+        assert_eq!(expected, actual);
+    }
 
     #[test]
     fn should_parse_delete_method() {
